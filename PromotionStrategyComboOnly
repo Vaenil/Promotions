@@ -1,0 +1,125 @@
+using System;
+
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //Get the input SKU count in order from user
+            Console.WriteLine("Welcome User! Enter the number of items:");
+            Console.WriteLine("A = ");
+
+            List<int> count = new List<int>();
+
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+
+
+            count.ForEach(Console.WriteLine);
+
+            //create a context
+           Context context = new Context();
+
+            //Set the promotion to activate
+            context.SetPromotionStrategy(new PromotionSKUCombined());
+
+            //Give user inputs to promotion
+            context.ApplyPromotion(count);
+                        
+        }
+    }
+
+    public abstract class PromotionStrategy
+    {
+        public abstract object DiscountCalculation(object o);
+    }
+
+    public class Context
+    {
+        private PromotionStrategy  _promotionStrategy;
+
+        //User has to access context class to choose the appropriate promotion class
+        public Context() { }
+
+        //Set the promotion strategy at run time
+        public void SetPromotionStrategy(PromotionStrategy ps)
+        {
+            _promotionStrategy = ps;
+            //_promotionStrategy.DiscountCalculation(ps);
+        }
+
+        //Get user input and call apply it to 
+        public void ApplyPromotion(object o)
+        {
+            _promotionStrategy.DiscountCalculation(o);
+        }
+               
+    }
+
+    public class PromotionPercentage : PromotionStrategy
+    {
+        public override object DiscountCalculation(object o)
+        {
+            //x%
+            return o;
+        }
+    }
+
+    public class PromotionSKUCombined : PromotionStrategy
+    {
+        public override object DiscountCalculation(object o)
+        {            
+            int priceCD = 0, priceC = 0, priceD = 0;
+           
+
+            //Get from list
+            var Count = o as List<int>;
+
+            int CountA = Count[0];
+            int CountB = Count[1];
+            int CountC = Count[2];
+            int CountD = Count[3];
+
+            Console.WriteLine("CountA =" + CountA);
+                Console.WriteLine("CountB =" + CountB);
+                Console.WriteLine("CountC =" + CountC);
+                Console.WriteLine("CountD =" + CountD);
+
+                //Calculation of promotions
+                int priceA = (CountA / 3) * 130 + (CountA % 3) * 50;
+                Console.WriteLine("CountAdiv3mul130 = " + (CountA / 3) * 130 + "    CountAmod3mul50 = " + (CountA % 3) * 50);
+                //Console.WriteLine("CountAmod3mul50 ="+(CountA%3)*50);
+                int priceB = (CountB / 2) * 45 + (CountB % 2) * 30;
+                Console.WriteLine("CountBdiv2mul45 = " + (CountB / 2) * 45 + "    CountBmod2mul30 = " + (CountB % 2) * 30);
+
+                while (CountC >= 1 && CountD >= 1)
+                {
+                    --CountC;
+                    --CountD;
+                    priceCD = priceCD + 30;
+                    Console.WriteLine("priceCDfor30 = " + priceCD);
+                }
+                if (CountC > 0)
+                {
+                    priceC = CountC * 20;
+                    Console.WriteLine("priceC = " + priceC);
+                }
+
+                if (CountD > 0)
+                {
+                    priceD = CountD * 15;
+                    Console.WriteLine("priceD = " + priceD);
+                }
+
+                int totalPrice = priceA + priceB + priceC + priceD + priceCD;
+
+                Console.WriteLine("Total price = " + totalPrice);
+            return totalPrice;
+                        
+        }
+    }
+}
