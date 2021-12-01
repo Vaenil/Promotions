@@ -1,0 +1,211 @@
+using System;
+
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //Get the input SKU count in order from user
+            Console.WriteLine("Welcome User! Enter the number of items of A, B, C and D:");
+            Console.WriteLine("A ");
+
+            List<int> count = new List<int>();
+
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            Console.WriteLine("B ");
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            Console.WriteLine("C ");
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+            Console.WriteLine("D ");
+            count.Add(Convert.ToInt32(Console.ReadLine()));
+
+            int x = 0;
+            Console.WriteLine("Enter how much % discount: ");
+            try
+            {
+                //to get percentage like 40% 
+                x = Convert.ToInt32(Console.ReadLine());
+            }
+            catch { }
+
+            count.ForEach(Console.WriteLine);
+
+            //create a context
+           Context context = new Context();
+
+            //Get from user which promotion to activate
+            Console.WriteLine("Enter which promotion to apply: ");
+            Console.WriteLine("Press 1 to activate PromotionCombo ");
+            Console.WriteLine("Press 2 to activate Percentage Promotion ");
+
+            int read = Convert.ToInt32(Console.ReadLine());
+
+            switch (read)
+            {
+                case 1:
+                    {
+                        //Set the promotion to activate
+                        context.SetPromotionStrategy(new PromotionSKUCombined());
+                    }
+                break;
+                case 2:
+
+                    {
+                        //Set the promotion to activate
+                        context.SetPromotionStrategy(new PromotionPercentage());
+                    }
+                break;
+                default:
+                    break;
+            }
+
+            //Give user inputs to promotion            
+            context.ApplyPromotion(count, x);
+
+        }
+    }
+
+    public abstract class PromotionStrategy
+    {
+        public abstract object DiscountCalculation(object o, int x);
+    }
+
+    public class Context
+    {
+        private PromotionStrategy  _promotionStrategy;
+
+        //User has to access context class to choose the appropriate promotion class
+        public Context() { }
+
+        //Set the promotion strategy at run time
+        public void SetPromotionStrategy(PromotionStrategy ps)
+        {
+            _promotionStrategy = ps;
+            //_promotionStrategy.DiscountCalculation(ps);
+        }
+
+        //Get user input and call apply it to 
+        public void ApplyPromotion(object o, int x)
+        {
+            _promotionStrategy.DiscountCalculation(o, x);
+        }
+               
+    }
+
+
+
+    public class PromotionPercentage : PromotionStrategy
+    {
+        public override object DiscountCalculation(object o, int x)
+        {
+            //x% of SKU unit price
+            //Get from list
+            var Count = o as List<int>;
+
+            int CountA = Count[0];
+            int CountB = Count[1];
+            int CountC = Count[2];
+            int CountD = Count[3];
+
+            Console.WriteLine("CountA =" + CountA);
+            Console.WriteLine("CountB =" + CountB);
+            Console.WriteLine("CountC =" + CountC);
+            Console.WriteLine("CountD =" + CountD);
+
+
+            double value = 1 - (x / 100.0);
+            //Calculation of promotions
+            double priceA = (CountA * 50) * value;
+            Console.WriteLine("CountA *50* % = " + (CountA * 50) * value);
+            double priceB = (CountB * 30)* value;
+            Console.WriteLine("CountB *30* % = " + (CountB *30* value));
+            double priceC = (CountC * 20)* value;
+            Console.WriteLine("CountC *20* % = " + (CountC *20* value));
+            double priceD = (CountD *15)* value;
+            Console.WriteLine("CountD *15* % = " + (CountD *15* value));
+
+            double totalPrice = priceA + priceB + priceC + priceD;
+
+            //Net price after Rabat :)            
+            Console.WriteLine("Total price = " + totalPrice + "  DKK");
+
+            ////Saved only if atleast some percent discount is applied on SKU
+            //if (x != 0)
+            //{
+            //    double saved = (CountA * 50) + (CountB * 30) + (CountC * 20) + (CountD * 15);
+
+            //    Console.WriteLine("You have saved = " + (saved - totalPrice) + "  DKK");
+            //}
+
+            return totalPrice;
+                        
+        }
+    }
+
+    public class PromotionSKUCombined : PromotionStrategy
+    {
+        public override object DiscountCalculation(object o, int x)
+        {            
+            int priceCD = 0, priceC = 0, priceD = 0;
+           
+
+            //Get from list
+            var Count = o as List<int>;
+
+            int CountA = Count[0];
+            int CountB = Count[1];
+            int CountC = Count[2];
+            int CountD = Count[3];
+
+                Console.WriteLine("CountA =" + CountA);
+                Console.WriteLine("CountB =" + CountB);
+                Console.WriteLine("CountC =" + CountC);
+                Console.WriteLine("CountD =" + CountD);
+
+                //Calculation of promotions
+                int priceA = (CountA / 3) * 130 + (CountA % 3) * 50;
+                
+                Console.WriteLine("CountAdiv3mul130 = " + (CountA / 3) * 130 + "    CountAmod3mul50 = " + (CountA % 3) * 50);
+                //Console.WriteLine("CountAmod3mul50 ="+(CountA%3)*50);
+                int priceB = (CountB / 2) * 45 + (CountB % 2) * 30;
+                Console.WriteLine("CountBdiv2mul45 = " + (CountB / 2) * 45 + "    CountBmod2mul30 = " + (CountB % 2) * 30);
+
+                while (CountC >= 1 && CountD >= 1)
+                {
+                    --CountC;
+                    --CountD;
+                    priceCD = priceCD + 30;
+                    Console.WriteLine("priceCDfor30 = " + priceCD);
+                }
+                if (CountC > 0)
+                {
+                    priceC = CountC * 20;
+                    Console.WriteLine("priceC = " + priceC);
+                }
+
+                if (CountD > 0)
+                {
+                    priceD = CountD * 15;
+                    Console.WriteLine("priceD = " + priceD);
+                }
+
+                int totalPrice = priceA + priceB + priceC + priceD + priceCD;
+
+            //Net price after Rabat :)            
+            Console.WriteLine("Total price = " + totalPrice + "  DKK");
+
+            ////Saved only if atleast some percent discount is applied on SKU
+            //if (x != 0)
+            //{
+            //    int savedAmount = (CountA * 50) + (CountB * 30) + (CountC * 20) + (CountD * 15);
+
+            //    Console.WriteLine("You have saved = " + (savedAmount - totalPrice) + "  DKK");
+            //}
+
+            return totalPrice;
+                        
+        }
+    }
+}
